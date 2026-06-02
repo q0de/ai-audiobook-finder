@@ -482,6 +482,18 @@ const META_PIXEL_ID = '';
 const PLAUSIBLE_SCRIPT_SRC = 'https://plausible.io/js/pa-lUe99Y9iGzDZhq1uwSbLf.js';
 /* ─────────────────────────────────────────────────────────────────────── */
 
+const FUNNEL_NAME = 'audiobook_finder';
+const PLAUSIBLE_EVENTS = {
+  page_view: 'Funnel Landing',
+  result_view: 'Result Viewed',
+  quiz_start: 'Quiz Started',
+  quiz_question_view: 'Quiz Step Viewed',
+  quiz_answer_select: 'Quiz Answered',
+  quiz_complete: 'Quiz Completed',
+  outbound_audible_click: 'Audible Clicked',
+  recs_refreshed: 'Recommendations Refreshed'
+};
+
 function initTrackingIntegrations(){
   if (GTM_ID){
     (function(w,d,s,l,i){
@@ -598,15 +610,6 @@ const LIVE_PICKS = {
   }
 };
 
-/* ── EVENT TRACKING ──────────────────────────────────────────────────────
-   Pushes to window.dataLayer (GTM-ready) and logs to console.             */
-function track(event, props){
-  const payload = Object.assign({ event: event, ts: new Date().toISOString() }, props || {});
-  (window.dataLayer = window.dataLayer || []).push(payload);
-  if (window.plausible) window.plausible(event, { props: props || {} });
-  try { console.log('%c[track] ' + event, 'color:#F8991C;font-weight:600', payload); } catch(e){}
-}
-
 /* ── UTM PRESERVATION ────────────────────────────────────────────────── */
 const UTM_KEYS = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid'];
 function getInboundParams(){
@@ -614,6 +617,53 @@ function getInboundParams(){
   UTM_KEYS.forEach(function(k){ const v = p.get(k); if(v) out[k] = v; });
   return out;
 }
+function attributionProps(){
+  const inbound = getInboundParams();
+  return {
+    funnel: FUNNEL_NAME,
+    path: location.pathname || '/',
+    profile_requested: new URLSearchParams(location.search).get('profile') || '',
+    utm_source: inbound.utm_source || '',
+    utm_medium: inbound.utm_medium || '',
+    utm_campaign: inbound.utm_campaign || '',
+    utm_content: inbound.utm_content || '',
+    utm_term: inbound.utm_term || '',
+    gclid_present: inbound.gclid ? 'yes' : 'no',
+    fbclid_present: inbound.fbclid ? 'yes' : 'no',
+    associate_tag: ASSOCIATE_TAG
+  };
+}
+function scalarProps(props){
+  const out = {};
+  Object.keys(props || {}).forEach(function(k){
+    const v = props[k];
+    if (v == null) out[k] = '';
+    else if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') out[k] = v;
+    else {
+      try { out[k] = JSON.stringify(v); } catch(e){ out[k] = String(v); }
+    }
+  });
+  return out;
+}
+function plausibleProps(event, props){
+  const merged = Object.assign({}, attributionProps(), props || {});
+  if (!merged.flow){
+    merged.flow = merged.source === 'profile_url' || merged.profile_requested ? 'direct_profile' : 'quiz';
+  }
+  merged.event_key = event;
+  return scalarProps(merged);
+}
+/* ── EVENT TRACKING ──────────────────────────────────────────────────────
+   Pushes to window.dataLayer (GTM-ready) and mirrors clean goals to Plausible. */
+function track(event, props){
+  const payload = Object.assign({ event: event, ts: new Date().toISOString() }, props || {});
+  (window.dataLayer = window.dataLayer || []).push(payload);
+  if (window.plausible){
+    window.plausible(PLAUSIBLE_EVENTS[event] || event, { props: plausibleProps(event, props || {}) });
+  }
+  try { console.log('%c[track] ' + event, 'color:#F8991C;font-weight:600', payload); } catch(e){}
+}
+
 function buildAffiliateUrl(profileKey){
   let url;
   try { url = new URL(AFFILIATE_BASE); } catch(e){ url = new URL('https://www.amazon.com/hz/audible/arya/mlp'); }
@@ -625,14 +675,21 @@ function buildAffiliateUrl(profileKey){
 }
 function outboundClickPayload(profileKey, href){
   let params = new URLSearchParams();
+  let targetDomain = '';
   try { params = new URL(href).searchParams; } catch(e){}
+  try { targetDomain = new URL(href).hostname; } catch(e){}
   return {
     profile: profileKey,
+    profile_name: PROFILES[profileKey] ? PROFILES[profileKey].name : '',
     href: href,
+    target_domain: targetDomain,
+    link_type: 'audible_affiliate',
+    flow: new URLSearchParams(location.search).get('profile') ? 'direct_profile' : 'quiz',
     utm_source: params.get('utm_source') || '',
     utm_medium: params.get('utm_medium') || '',
     utm_campaign: params.get('utm_campaign') || '',
     utm_content: params.get('utm_content') || '',
+    utm_term: params.get('utm_term') || '',
     aaf_profile: params.get('aaf_profile') || profileKey
   };
 }
@@ -798,6 +855,13 @@ function show(screen){
 function renderQuestion(){
   const total = QUESTIONS.length;
   const Q = QUESTIONS[step];
+  track('quiz_question_view', {
+    flow: 'quiz',
+    step_number: step + 1,
+    step_total: total,
+    progress_pct: Math.round(((step + 1) / total) * 100),
+    question_key: 'q' + (step + 1)
+  });
   $('#q-now').textContent = step + 1;
   $('#q-total').textContent = total;
   $('#q-pct').textContent = Math.round(((step + 1) / total) * 100) + '%';
@@ -822,6 +886,17 @@ function renderQuestion(){
 }
 
 function pickAnswer(i){
+  const Q = QUESTIONS[step];
+  const answer = Q.a[i];
+  track('quiz_answer_select', {
+    flow: 'quiz',
+    step_number: step + 1,
+    step_total: QUESTIONS.length,
+    question_key: 'q' + (step + 1),
+    answer_index: i + 1,
+    answer_label: answer.t,
+    answer_profiles: Object.keys(answer.w).join(',')
+  });
   answers[step] = i;
   // brief visual confirm, then advance
   const btns = $('#q-answers').children;
@@ -894,7 +969,9 @@ function showResult(profileKey, details){
   const token = ++renderToken;
   const resultProps = Object.assign({
     profile: profileKey,
-    profile_name: P.name
+    profile_name: P.name,
+    aaf_profile: profileKey,
+    cta_href: buildAffiliateUrl(profileKey)
   }, details || {});
   track('result_view', resultProps);
 
@@ -941,7 +1018,7 @@ function finishQuiz(){
 
 /* ── FLOW WIRING ─────────────────────────────────────────────────────── */
 $('#start-btn').addEventListener('click', function(){
-  if (!started){ track('quiz_start'); started = true; }
+  if (!started){ track('quiz_start', { flow: 'quiz', source: 'start_button' }); started = true; }
   step = 0; answers = [];
   renderQuestion();
   show('quiz');
@@ -955,10 +1032,16 @@ $('#retake-btn').addEventListener('click', function(){
 
 /* page_view */
 initTrackingIntegrations();
-track('page_view', { path: location.pathname, utms: getInboundParams() });
-
 const requestedProfile = new URLSearchParams(location.search).get('profile');
 const directProfile = requestedProfile ? PROFILE_ALIASES[requestedProfile.toLowerCase()] : null;
+track('page_view', {
+  path: location.pathname,
+  utms: getInboundParams(),
+  flow: directProfile ? 'direct_profile' : 'quiz',
+  profile: directProfile || '',
+  profile_requested: requestedProfile || '',
+  source: directProfile ? 'profile_url' : 'quiz_landing'
+});
 if (directProfile){
   started = true;
   showResult(directProfile, { source: 'profile_url', requested_profile: requestedProfile });
