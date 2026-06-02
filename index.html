@@ -475,6 +475,51 @@ const AFFILIATE_BASE = 'https://www.amazon.com/hz/audible/arya/mlp';
 const ASSOCIATE_TAG  = 'saunaprotocol-20';
 /* ─────────────────────────────────────────────────────────────────────── */
 
+/* ── OPTIONAL TRACKING CONFIG ──────────────────────────────────────────────
+   Leave blank until real IDs are created/confirmed. No placeholder IDs.    */
+const GTM_ID = '';
+const META_PIXEL_ID = '';
+/* ─────────────────────────────────────────────────────────────────────── */
+
+function initTrackingIntegrations(){
+  if (GTM_ID){
+    (function(w,d,s,l,i){
+      w[l]=w[l]||[];
+      w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+      var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),
+          dl=l!='dataLayer'?'&l='+l:'';
+      j.async=true;
+      j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+      f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer',GTM_ID);
+
+    var gtmNoScript = document.createElement('noscript');
+    gtmNoScript.innerHTML = '<iframe src="https://www.googletagmanager.com/ns.html?id=' +
+      GTM_ID + '" height="0" width="0" style="display:none;visibility:hidden"></iframe>';
+    document.body.insertBefore(gtmNoScript, document.body.firstChild);
+  }
+
+  if (META_PIXEL_ID){
+    !function(f,b,e,v,n,t,s){
+      if(f.fbq)return;
+      n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;
+      n.push=n;
+      n.loaded=!0;
+      n.version='2.0';
+      n.queue=[];
+      t=b.createElement(e);
+      t.async=!0;
+      t.src=v;
+      s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s);
+    }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', META_PIXEL_ID);
+    fbq('track', 'PageView');
+  }
+}
+
 /* ── LIVE "MOST POPULAR" PICKS ────────────────────────────────────────────
    To keep recommendations feeling current, we pull each profile's most-
    popular titles at result time from Open Library (free, no API key, CORS-
@@ -563,6 +608,19 @@ function buildAffiliateUrl(profileKey){
   Object.keys(inbound).forEach(function(k){ url.searchParams.set(k, inbound[k]); });
   url.searchParams.set('aaf_profile', profileKey);     // attribution: which quiz result
   return url.toString();
+}
+function outboundClickPayload(profileKey, href){
+  let params = new URLSearchParams();
+  try { params = new URL(href).searchParams; } catch(e){}
+  return {
+    profile: profileKey,
+    href: href,
+    utm_source: params.get('utm_source') || '',
+    utm_medium: params.get('utm_medium') || '',
+    utm_campaign: params.get('utm_campaign') || '',
+    utm_content: params.get('utm_content') || '',
+    aaf_profile: params.get('aaf_profile') || profileKey
+  };
 }
 
 /* ── QUIZ DATA ───────────────────────────────────────────────────────────
@@ -835,7 +893,7 @@ function showResult(profileKey, details){
 
   const cta = $('#cta-btn');
   cta.href = buildAffiliateUrl(profileKey);
-  cta.onclick = function(){ track('outbound_audible_click', { profile: profileKey, href: cta.href }); };
+  cta.onclick = function(){ track('outbound_audible_click', outboundClickPayload(profileKey, cta.href)); };
 
   show('result');
 
@@ -882,6 +940,7 @@ $('#retake-btn').addEventListener('click', function(){
 });
 
 /* page_view */
+initTrackingIntegrations();
 track('page_view', { path: location.pathname, utms: getInboundParams() });
 
 const requestedProfile = new URLSearchParams(location.search).get('profile');
