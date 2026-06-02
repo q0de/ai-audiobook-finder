@@ -425,7 +425,7 @@
         </a>
         <div class="disclosure" style="margin-top:14px;">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 11v5M12 7.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          <span><b style="color:var(--muted);font-weight:600;">Affiliate disclosure.</b> As an Audible / Amazon Associate, we may earn a commission when you sign up through our links, at no extra cost to you. These picks are informational suggestions, not endorsements.</span>
+          <span><b style="color:var(--muted);font-weight:600;">Affiliate disclosure.</b> (paid link) As an Amazon Associate I earn from qualifying purchases. These picks are informational suggestions, not endorsements.</span>
         </div>
       </div>
       <div class="retake"><button id="retake-btn">↺ Retake the quiz</button></div>
@@ -470,11 +470,9 @@
    Single static file. No backend, no dependencies.
    ════════════════════════════════════════════════════════════════════════ */
 
-/* ── AFFILIATE CONFIG ─────────────────────────────────────────────────────
-   ⚠️  Replace these before spending budget. Do NOT assume the bounty is
-   active until verified in Amazon Associates.                              */
-const AFFILIATE_BASE = 'https://www.audible.com/';   // landing URL
-const ASSOCIATE_TAG  = 'YOURTAG-20';                 // Amazon Associates tag — REPLACE
+/* ── AFFILIATE CONFIG ───────────────────────────────────────────────────── */
+const AFFILIATE_BASE = 'https://www.amazon.com/hz/audible/arya/mlp';
+const ASSOCIATE_TAG  = 'saunaprotocol-20';
 /* ─────────────────────────────────────────────────────────────────────── */
 
 /* ── LIVE "MOST POPULAR" PICKS ────────────────────────────────────────────
@@ -559,8 +557,8 @@ function getInboundParams(){
 }
 function buildAffiliateUrl(profileKey){
   let url;
-  try { url = new URL(AFFILIATE_BASE); } catch(e){ url = new URL('https://www.audible.com/'); }
-  if (ASSOCIATE_TAG && ASSOCIATE_TAG.indexOf('YOURTAG') !== 0) url.searchParams.set('tag', ASSOCIATE_TAG);
+  try { url = new URL(AFFILIATE_BASE); } catch(e){ url = new URL('https://www.amazon.com/hz/audible/arya/mlp'); }
+  url.searchParams.set('tag', ASSOCIATE_TAG);
   const inbound = getInboundParams();
   Object.keys(inbound).forEach(function(k){ url.searchParams.set(k, inbound[k]); });
   url.searchParams.set('aaf_profile', profileKey);     // attribution: which quiz result
@@ -661,6 +659,16 @@ const PROFILES = {
     ] }
 };
 const PRIORITY = ['fiction','growth','business','curious','commute','calm'];
+const PROFILE_ALIASES = {
+  commute: 'commute',
+  business: 'business',
+  fiction: 'fiction',
+  calm: 'calm',
+  motivation: 'growth',
+  growth: 'growth',
+  learning: 'curious',
+  curious: 'curious'
+};
 
 /* ── STATE ───────────────────────────────────────────────────────────── */
 let step = 0;                 // 0..QUESTIONS.length-1
@@ -808,11 +816,15 @@ function renderRecs(recs){
 }
 
 /* ── RESULTS ─────────────────────────────────────────────────────────── */
-function finishQuiz(){
-  const r = computeProfile();
-  const P = PROFILES[r.key];
+function showResult(profileKey, details){
+  const P = PROFILES[profileKey];
+  if (!P) return false;
   const token = ++renderToken;
-  track('quiz_complete', { profile: r.key, profile_name: P.name, scores: r.score });
+  const resultProps = Object.assign({
+    profile: profileKey,
+    profile_name: P.name
+  }, details || {});
+  track('result_view', resultProps);
 
   $('#r-name').textContent = P.name;
   $('#r-why').textContent = P.why;
@@ -822,8 +834,8 @@ function finishQuiz(){
   renderRecs(P.recs);
 
   const cta = $('#cta-btn');
-  cta.href = buildAffiliateUrl(r.key);
-  cta.onclick = function(){ track('outbound_audible_click', { profile: r.key, href: cta.href }); };
+  cta.href = buildAffiliateUrl(profileKey);
+  cta.onclick = function(){ track('outbound_audible_click', { profile: profileKey, href: cta.href }); };
 
   show('result');
 
@@ -832,7 +844,7 @@ function finishQuiz(){
 
   // 2) In the background, try to refresh with the latest most-popular titles.
   if (LIVE_PICKS.enabled){
-    LIVE_PICKS.fetch(r.key).then(function(live){
+    LIVE_PICKS.fetch(profileKey).then(function(live){
       if (!live || token !== renderToken) return;   // failed, or user already retook
       const recBox = $('#r-recs');
       recBox.classList.add('swapping');
@@ -841,10 +853,18 @@ function finishQuiz(){
         renderRecs(live);
         recBox.classList.remove('swapping');
         $('#r-fresh').classList.add('show');
-        track('recs_refreshed', { profile: r.key, source: 'openlibrary', count: live.length });
+        track('recs_refreshed', { profile: profileKey, source: 'openlibrary', count: live.length });
       }, 180);
     });
   }
+  return true;
+}
+
+function finishQuiz(){
+  const r = computeProfile();
+  const P = PROFILES[r.key];
+  track('quiz_complete', { profile: r.key, profile_name: P.name, scores: r.score });
+  showResult(r.key, { source: 'quiz', scores: r.score });
 }
 
 /* ── FLOW WIRING ─────────────────────────────────────────────────────── */
@@ -863,6 +883,13 @@ $('#retake-btn').addEventListener('click', function(){
 
 /* page_view */
 track('page_view', { path: location.pathname, utms: getInboundParams() });
+
+const requestedProfile = new URLSearchParams(location.search).get('profile');
+const directProfile = requestedProfile ? PROFILE_ALIASES[requestedProfile.toLowerCase()] : null;
+if (directProfile){
+  started = true;
+  showResult(directProfile, { source: 'profile_url', requested_profile: requestedProfile });
+}
 
 /* ════════════════════════════════════════════════════════════════════════
    TWEAKS — vanilla host protocol (no framework)
