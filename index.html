@@ -479,6 +479,7 @@ const ASSOCIATE_TAG  = 'saunaprotocol-20';
    Leave blank until real IDs are created/confirmed. No placeholder IDs.    */
 const GTM_ID = '';
 const META_PIXEL_ID = '';
+const PLAUSIBLE_DOMAIN = 'ads-audible.vercel.app';
 /* ─────────────────────────────────────────────────────────────────────── */
 
 function initTrackingIntegrations(){
@@ -517,6 +518,17 @@ function initTrackingIntegrations(){
     }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', META_PIXEL_ID);
     fbq('track', 'PageView');
+  }
+
+  if (PLAUSIBLE_DOMAIN){
+    var plausibleScript = document.createElement('script');
+    plausibleScript.defer = true;
+    plausibleScript.dataset.domain = PLAUSIBLE_DOMAIN;
+    plausibleScript.src = 'https://plausible.io/js/script.js';
+    document.head.appendChild(plausibleScript);
+    window.plausible = window.plausible || function(){
+      (window.plausible.q = window.plausible.q || []).push(arguments);
+    };
   }
 }
 
@@ -590,6 +602,7 @@ const LIVE_PICKS = {
 function track(event, props){
   const payload = Object.assign({ event: event, ts: new Date().toISOString() }, props || {});
   (window.dataLayer = window.dataLayer || []).push(payload);
+  if (window.plausible) window.plausible(event, { props: props || {} });
   try { console.log('%c[track] ' + event, 'color:#F8991C;font-weight:600', payload); } catch(e){}
 }
 
