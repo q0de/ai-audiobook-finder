@@ -1,0 +1,6 @@
+_ref/
+design_bundle/
+.claude/
+.vercel/
+.DS_Store
+node_modules/
