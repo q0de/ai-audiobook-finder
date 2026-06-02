@@ -479,7 +479,7 @@ const ASSOCIATE_TAG  = 'saunaprotocol-20';
    Leave blank until real IDs are created/confirmed. No placeholder IDs.    */
 const GTM_ID = '';
 const META_PIXEL_ID = '';
-const PLAUSIBLE_DOMAIN = 'ads-audible.vercel.app';
+const PLAUSIBLE_SCRIPT_SRC = 'https://plausible.io/js/pa-lUe99Y9iGzDZhq1uwSbLf.js';
 /* ─────────────────────────────────────────────────────────────────────── */
 
 function initTrackingIntegrations(){
@@ -520,15 +520,16 @@ function initTrackingIntegrations(){
     fbq('track', 'PageView');
   }
 
-  if (PLAUSIBLE_DOMAIN){
+  if (PLAUSIBLE_SCRIPT_SRC){
     var plausibleScript = document.createElement('script');
-    plausibleScript.defer = true;
-    plausibleScript.dataset.domain = PLAUSIBLE_DOMAIN;
-    plausibleScript.src = 'https://plausible.io/js/script.js';
+    plausibleScript.async = true;
+    plausibleScript.src = PLAUSIBLE_SCRIPT_SRC;
     document.head.appendChild(plausibleScript);
     window.plausible = window.plausible || function(){
       (window.plausible.q = window.plausible.q || []).push(arguments);
     };
+    window.plausible.init = window.plausible.init || function(i){ window.plausible.o = i || {}; };
+    window.plausible.init();
   }
 }
 
