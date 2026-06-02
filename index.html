@@ -478,7 +478,7 @@ const ASSOCIATE_TAG  = 'saunaprotocol-20';
 /* ── OPTIONAL TRACKING CONFIG ──────────────────────────────────────────────
    Leave blank until real IDs are created/confirmed. No placeholder IDs.    */
 const GTM_ID = '';
-const META_PIXEL_ID = '';
+const META_PIXEL_ID = '1682502663002475';
 const PLAUSIBLE_SCRIPT_SRC = 'https://plausible.io/js/pa-lUe99Y9iGzDZhq1uwSbLf.js';
 /* ─────────────────────────────────────────────────────────────────────── */
 
@@ -492,6 +492,16 @@ const PLAUSIBLE_EVENTS = {
   quiz_complete: 'Quiz Completed',
   outbound_audible_click: 'Audible Clicked',
   recs_refreshed: 'Recommendations Refreshed'
+};
+
+/* Funnel event -> Meta Pixel event. Standard events where one fits (so they
+   show up as optimizable conversions), trackCustom for the rest. PageView is
+   already fired on init. Outbound Audible click is the key conversion.       */
+const META_EVENTS = {
+  quiz_start:             { method:'trackCustom', name:'QuizStarted' },
+  quiz_complete:          { method:'track',       name:'Lead' },
+  result_view:            { method:'track',       name:'ViewContent' },
+  outbound_audible_click: { method:'track',       name:'InitiateCheckout' }
 };
 
 function initTrackingIntegrations(){
@@ -660,6 +670,10 @@ function track(event, props){
   (window.dataLayer = window.dataLayer || []).push(payload);
   if (window.plausible){
     window.plausible(PLAUSIBLE_EVENTS[event] || event, { props: plausibleProps(event, props || {}) });
+  }
+  if (window.fbq && META_EVENTS[event]){
+    const m = META_EVENTS[event];
+    try { window.fbq(m.method, m.name, { content_name: event, content_category: (props && props.profile) || '' }); } catch(e){}
   }
   try { console.log('%c[track] ' + event, 'color:#F8991C;font-weight:600', payload); } catch(e){}
 }
