@@ -565,7 +565,7 @@ function initTrackingIntegrations(){
    Swap LIVE_PICKS.fetch() for any other source (NYT Books API, your own
    endpoint, etc.) without touching the rest of the funnel.                 */
 const LIVE_PICKS = {
-  enabled: true,        // master switch — set false to ship pure-curated
+  enabled: false,       // keep curated Audible-ready picks stable for paid traffic
   timeoutMs: 3500,      // give up and keep curated picks after this
   count: 3,
   // profileKey -> Open Library subject used to rank "most popular" works
