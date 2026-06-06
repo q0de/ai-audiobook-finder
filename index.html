@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AI Audiobook Finder — Find your next listen in 60 seconds</title>
-<meta name="description" content="Answer five quick questions and get three audiobook picks matched to your goal, mood, and listening time." />
+<title>AI Audiobook Finder — Don't waste your free Audible pick</title>
+<meta name="description" content="Get audiobook picks for your commute, bedtime, business goals, money, fiction mood, or first Audible listen." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://openlibrary.org" />
@@ -120,6 +120,31 @@
     margin-top:20px;
   }
   .meta .dot{ width:3px; height:3px; border-radius:50%; background:var(--faint); }
+  .intent-grid{
+    display:grid; grid-template-columns:1fr; gap:10px;
+    margin-top:18px;
+  }
+  .choice-divider{
+    display:flex; align-items:center; gap:14px;
+    color:var(--faint);
+    font-size:13px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    margin:26px 0 0;
+  }
+  .choice-divider::before,
+  .choice-divider::after{
+    content:""; flex:1; height:1px; background:var(--line-strong);
+  }
+  .intent-link{
+    color:var(--text); text-decoration:none;
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:14px 15px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    -webkit-backdrop-filter:blur(var(--blur)); backdrop-filter:blur(var(--blur));
+    transition:border-color .18s ease, background .18s ease, transform .12s ease;
+  }
+  .intent-link:hover{ border-color:var(--accent-line); background:var(--card-strong); transform:translateY(-1px); }
+  .intent-link b{ font-size:15px; font-weight:650; }
+  .intent-link span{ color:var(--faint); font-size:17px; }
 
   /* ─────────────────────────────  BUTTONS  ───────────────────────────── */
   .btn{
@@ -138,6 +163,12 @@
   .btn-primary:active{ transform:translateY(0); }
   .btn-primary .arr{ transition:transform .2s ease; }
   .btn-primary:hover .arr{ transform:translateX(4px); }
+  .btn-secondary{
+    background:transparent; color:var(--text);
+    border:1px solid var(--line-strong);
+    margin-top:10px;
+  }
+  .btn-secondary:hover{ transform:translateY(-1px); border-color:var(--accent-line); background:var(--card); }
 
   /* ─────────────────────────────  QUIZ  ───────────────────────────── */
   .qhead{ margin-bottom:24px; }
@@ -193,8 +224,8 @@
   }
   .profile{
     font-family:var(--font-head); font-weight:600;
-    font-size:clamp(32px, 9vw, 42px); line-height:1.06; letter-spacing:-0.015em;
-    margin-bottom:14px; text-wrap:balance;
+    font-size:clamp(30px, 8.2vw, 40px); line-height:1.07; letter-spacing:-0.01em;
+    margin-bottom:14px; text-wrap:balance; overflow-wrap:break-word;
   }
   .profile-why{ color:var(--muted); font-size:16.5px; max-width:46ch; text-wrap:pretty; margin-bottom:26px; }
 
@@ -261,6 +292,15 @@
   .rec-meta h4{ font-family:var(--font-head); font-weight:600; font-size:17px; line-height:1.18; letter-spacing:-0.005em; }
   .rec-meta .auth{ color:var(--faint); font-size:13.5px; font-weight:500; margin:1px 0 5px; }
   .rec-meta p{ color:var(--muted); font-size:13.5px; line-height:1.4; text-wrap:pretty; }
+  .rec-pick{
+    margin-top:8px;
+    color:var(--accent);
+    font-size:13px;
+    font-weight:700;
+    text-decoration:none;
+    display:inline-flex;
+  }
+  .rec-pick:hover{ text-decoration:underline; text-underline-offset:3px; }
 
   .cta-card{
     background:var(--card-strong); border:1px solid var(--line-strong); border-radius:18px;
@@ -369,21 +409,23 @@
     <header class="brand">
       <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <b>AI Audiobook Finder</b>
-      <span>·&nbsp; 60-second quiz</span>
+      <span>·&nbsp; Audible picks</span>
     </header>
 
     <!-- ───── HERO ───── -->
     <section class="screen active" id="screen-hero">
       <div class="hero">
         <span class="eyebrow">Personalized in under a minute</span>
-        <h1>Find your next audiobook in <em>60 seconds.</em></h1>
-        <p class="sub">Answer five quick questions. Get three audiobook picks matched to your goal, mood, and listening time.</p>
-        <button class="btn btn-primary" id="start-btn">Start the quiz <span class="arr">→</span></button>
+        <h1>Don’t waste your free <em>Audible pick.</em></h1>
+        <p class="sub">Choose the situation you’re listening for and get three audiobook picks you can start with right away.</p>
+        <button class="btn btn-primary" id="start-btn">Take the quiz for personalized picks <span class="arr">→</span></button>
+        <div class="choice-divider">or</div>
+        <div class="intent-grid" id="intent-grid"></div>
         <div class="meta">
           <span>Free</span><span class="dot"></span>
           <span>No sign-up</span><span class="dot"></span>
-          <span>5 questions</span><span class="dot"></span>
-          <span>3 picks</span>
+          <span>Instant picks</span><span class="dot"></span>
+          <span>Optional quiz</span>
         </div>
       </div>
     </section>
@@ -408,21 +450,22 @@
 
     <!-- ───── RESULTS ───── -->
     <section class="screen" id="screen-result">
-      <div class="res-eyebrow">Your listener profile</div>
+      <div class="res-eyebrow" id="r-eyebrow">Your listener profile</div>
       <h2 class="profile" id="r-name">—</h2>
       <p class="profile-why" id="r-why">—</p>
 
-      <div class="recs-label">
+      <div class="recs-label" id="r-recs-label">
         Three picks for you
         <span class="fresh" id="r-fresh"><span class="pulse"></span>Trending now</span>
       </div>
       <div class="recs" id="r-recs"></div>
 
       <div class="cta-card">
-        <p class="cta-note">Ready to press play? Start a listen on Audible.</p>
+        <p class="cta-note" id="cta-note">Ready to press play? Start a listen on Audible.</p>
         <a class="btn btn-primary" id="cta-btn" href="#" target="_blank" rel="noopener nofollow sponsored">
-          Start listening with Audible <span class="arr">→</span>
+          Start listening <span class="arr">→</span>
         </a>
+        <button class="btn btn-secondary" id="result-quiz-btn">Take the quiz for personalized picks</button>
         <div class="disclosure" style="margin-top:14px;">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 11v5M12 7.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <span><b style="color:var(--muted);font-weight:600;">Affiliate disclosure.</b> (paid link) As an Amazon Associate I earn from qualifying purchases. These picks are informational suggestions, not endorsements.</span>
@@ -485,11 +528,13 @@ const PLAUSIBLE_SCRIPT_SRC = 'https://plausible.io/js/pa-lUe99Y9iGzDZhq1uwSbLf.j
 const FUNNEL_NAME = 'audiobook_finder';
 const PLAUSIBLE_EVENTS = {
   page_view: 'Funnel Landing',
+  intent_page_view: 'Intent Page Viewed',
   result_view: 'Result Viewed',
   quiz_start: 'Quiz Started',
   quiz_question_view: 'Quiz Step Viewed',
   quiz_answer_select: 'Quiz Answered',
   quiz_complete: 'Quiz Completed',
+  recommendation_select: 'Recommendation Selected',
   outbound_audible_click: 'Audible Clicked',
   recs_refreshed: 'Recommendations Refreshed'
 };
@@ -498,6 +543,7 @@ const PLAUSIBLE_EVENTS = {
    show up as optimizable conversions), trackCustom for the rest. PageView is
    already fired on init. Outbound Audible click is the key conversion.       */
 const META_EVENTS = {
+  intent_page_view:       { method:'track',       name:'ViewContent' },
   quiz_start:             { method:'trackCustom', name:'QuizStarted' },
   quiz_complete:          { method:'track',       name:'Lead' },
   result_view:            { method:'track',       name:'ViewContent' },
@@ -629,10 +675,12 @@ function getInboundParams(){
 }
 function attributionProps(){
   const inbound = getInboundParams();
+  const params = new URLSearchParams(location.search);
   return {
     funnel: FUNNEL_NAME,
     path: location.pathname || '/',
-    profile_requested: new URLSearchParams(location.search).get('profile') || '',
+    profile_requested: params.get('profile') || '',
+    intent_requested: params.get('intent') || '',
     utm_source: inbound.utm_source || '',
     utm_medium: inbound.utm_medium || '',
     utm_campaign: inbound.utm_campaign || '',
@@ -658,7 +706,8 @@ function scalarProps(props){
 function plausibleProps(event, props){
   const merged = Object.assign({}, attributionProps(), props || {});
   if (!merged.flow){
-    merged.flow = merged.source === 'profile_url' || merged.profile_requested ? 'direct_profile' : 'quiz';
+    merged.flow = merged.source === 'intent_url' || merged.intent_requested ? 'direct_intent' :
+      (merged.source === 'profile_url' || merged.profile_requested ? 'direct_profile' : 'quiz');
   }
   merged.event_key = event;
   return scalarProps(merged);
@@ -678,13 +727,16 @@ function track(event, props){
   try { console.log('%c[track] ' + event, 'color:#F8991C;font-weight:600', payload); } catch(e){}
 }
 
-function buildAffiliateUrl(profileKey){
+function buildAffiliateUrl(profileKey, extra){
   let url;
   try { url = new URL(AFFILIATE_BASE); } catch(e){ url = new URL('https://www.amazon.com/hz/audible/arya/mlp'); }
   url.searchParams.set('tag', ASSOCIATE_TAG);
   const inbound = getInboundParams();
   Object.keys(inbound).forEach(function(k){ url.searchParams.set(k, inbound[k]); });
   url.searchParams.set('aaf_profile', profileKey);     // attribution: which quiz result
+  Object.keys(extra || {}).forEach(function(k){
+    if (extra[k] != null && extra[k] !== '') url.searchParams.set(k, extra[k]);
+  });
   return url.toString();
 }
 function outboundClickPayload(profileKey, href){
@@ -698,7 +750,8 @@ function outboundClickPayload(profileKey, href){
     href: href,
     target_domain: targetDomain,
     link_type: 'audible_affiliate',
-    flow: new URLSearchParams(location.search).get('profile') ? 'direct_profile' : 'quiz',
+    flow: currentFlow(),
+    intent: activeIntentKey || '',
     utm_source: params.get('utm_source') || '',
     utm_medium: params.get('utm_medium') || '',
     utm_campaign: params.get('utm_campaign') || '',
@@ -807,10 +860,108 @@ const PROFILE_ALIASES = {
   business: 'business',
   fiction: 'fiction',
   calm: 'calm',
+  sleep: 'calm',
+  entrepreneurs: 'business',
+  entrepreneur: 'business',
+  finance: 'business',
+  money: 'business',
   motivation: 'growth',
   growth: 'growth',
+  "hate-reading": 'commute',
+  hatereading: 'commute',
+  reading: 'commute',
   learning: 'curious',
   curious: 'curious'
+};
+
+const INTENTS = {
+  commute: {
+    label: 'Best audiobooks for your commute',
+    profile: 'commute',
+    eyebrow: 'Commute productivity',
+    headline: 'Turn your commute into learning time.',
+    why: 'You need a listen that catches quickly, survives interruptions, and makes the ride feel shorter.',
+    recsLabel: 'Three commute-ready picks',
+    ctaNote: 'Use your Audible trial on something that makes the drive, walk, or train ride feel worth it.'
+  },
+  sleep: {
+    label: 'Best audiobooks for sleep',
+    profile: 'calm',
+    eyebrow: 'Sleep and calm',
+    headline: 'Find a calming listen for tonight.',
+    why: 'You want a slower pace, a gentler voice, and a listen that helps the day power down.',
+    recsLabel: 'Three calming picks',
+    ctaNote: 'Start with a soothing listen and save the high-intensity books for daylight.'
+  },
+  entrepreneurs: {
+    label: 'Best audiobooks for entrepreneurs',
+    profile: 'business',
+    eyebrow: 'Entrepreneur picks',
+    headline: 'Get three business audiobooks matched to your goals.',
+    why: 'You want strategy, founder stories, and practical ideas you can absorb between work sessions.',
+    recsLabel: 'Three entrepreneur-ready picks',
+    ctaNote: 'Use your Audible trial on a business book you might actually finish.',
+    recs: [
+      { title:"Shoe Dog", author:"Phil Knight", cv:"#487A9B", note:"A candid founder story with real narrative pull." },
+      { title:"Zero to One", author:"Peter Thiel", cv:"#365F7A", note:"A sharp startup framework for building something new." },
+      { title:"The Lean Startup", author:"Eric Ries", cv:"#3F6E8C", note:"A practical classic for testing ideas before you overbuild." }
+    ]
+  },
+  finance: {
+    label: 'Best finance audiobooks in 2026',
+    profile: 'business',
+    eyebrow: 'Money and finance',
+    headline: 'Use your trial on a finance book that sticks.',
+    why: 'You want money ideas that are clear enough to remember and practical enough to change behavior.',
+    recsLabel: 'Three finance-forward picks',
+    ctaNote: 'Start with a money listen that rewards the hours you put into it.',
+    recs: [
+      { title:"The Psychology of Money", author:"Morgan Housel", cv:"#3F6E8C", note:"Short, memorable lessons on wealth and behavior." },
+      { title:"I Will Teach You To Be Rich", author:"Ramit Sethi", cv:"#4D7D55", note:"Direct, practical personal finance advice." },
+      { title:"The Simple Path to Wealth", author:"JL Collins", cv:"#B58A2E", note:"A calm, clear case for long-term investing." }
+    ]
+  },
+  fiction: {
+    label: 'Best audiobooks for your mood',
+    profile: 'fiction',
+    eyebrow: 'Fiction mood',
+    headline: 'Find a story that fits your mood.',
+    why: 'You want narration, characters, and momentum strong enough to pull you out of your day.',
+    recsLabel: 'Three story-first picks',
+    ctaNote: 'Use your Audible trial on a story with audio performance baked in.'
+  },
+  'hate-reading': {
+    label: 'Best audiobooks for people who hate reading',
+    profile: 'commute',
+    eyebrow: 'For reluctant readers',
+    headline: 'Get the book without fighting the pages.',
+    why: 'You want something easy to start, easy to return to, and engaging enough that listening feels natural.',
+    recsLabel: 'Three easy-entry picks',
+    ctaNote: 'Try an audiobook that works even if sitting down with a book never does.',
+    recs: [
+      { title:"Born a Crime", author:"Trevor Noah", cv:"#C9772B", note:"Funny, personal, and especially strong in audio." },
+      { title:"Greenlights", author:"Matthew McConaughey", cv:"#B58A2E", note:"Loose, memorable storytelling from the author." },
+      { title:"Project Hail Mary", author:"Andy Weir", cv:"#7A5AC2", note:"A fast story with narration that makes it easier to stay hooked." }
+    ]
+  }
+};
+
+const INTENT_ALIASES = {
+  commute: 'commute',
+  commuting: 'commute',
+  sleep: 'sleep',
+  calm: 'sleep',
+  bedtime: 'sleep',
+  entrepreneur: 'entrepreneurs',
+  entrepreneurs: 'entrepreneurs',
+  business: 'entrepreneurs',
+  finance: 'finance',
+  money: 'finance',
+  fiction: 'fiction',
+  mood: 'fiction',
+  'hate-reading': 'hate-reading',
+  hatereading: 'hate-reading',
+  reluctant: 'hate-reading'
 };
 
 /* ── STATE ───────────────────────────────────────────────────────────── */
@@ -818,8 +969,41 @@ let step = 0;                 // 0..QUESTIONS.length-1
 let answers = [];             // selected answer index per question
 let started = false;
 let renderToken = 0;          // guards against stale async results clobbering a retake
+let activeIntentKey = '';
 
 const $ = function(s){ return document.querySelector(s); };
+
+function currentFlow(){
+  if (activeIntentKey) return 'direct_intent';
+  return new URLSearchParams(location.search).get('profile') ? 'direct_profile' : 'quiz';
+}
+
+function normalizeIntent(raw){
+  if (!raw) return null;
+  return INTENT_ALIASES[String(raw).toLowerCase()] || null;
+}
+
+function renderIntentLinks(){
+  const grid = $('#intent-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  ['commute','sleep','entrepreneurs','finance','fiction','hate-reading'].forEach(function(key){
+    const intent = INTENTS[key];
+    const link = document.createElement('a');
+    link.className = 'intent-link';
+    link.href = '?intent=' + encodeURIComponent(key);
+    link.innerHTML = '<b>' + intent.label + '</b><span>→</span>';
+    link.addEventListener('click', function(){
+      track('intent_page_view', {
+        flow: 'intent_link',
+        intent: key,
+        profile: intent.profile,
+        source: 'hero_intent_link'
+      });
+    });
+    grid.appendChild(link);
+  });
+}
 
 /* ── JUICE HELPERS ───────────────────────────────────────────────────── */
 const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -946,7 +1130,8 @@ function computeProfile(){
 }
 
 /* ── RENDER RECOMMENDATION CARDS ─────────────────────────────────────── */
-function renderRecs(recs){
+function renderRecs(recs, context){
+  context = context || {};
   const recBox = $('#r-recs');
   recBox.innerHTML = '';
   recs.forEach(function(rec, idx){
@@ -959,7 +1144,24 @@ function renderRecs(recs){
         '<h4>' + rec.title + '</h4>' +
         '<div class="auth">' + rec.author + '</div>' +
         '<p>' + rec.note + '</p>' +
+        '<a class="rec-pick" href="' + buildAffiliateUrl(context.profile || '', {
+          aaf_intent: context.intent || '',
+          aaf_book: rec.title
+        }) + '" target="_blank" rel="noopener nofollow sponsored">Start this pick</a>' +
       '</div>';
+    const pickLink = el.querySelector('.rec-pick');
+    pickLink.addEventListener('click', function(){
+      track('recommendation_select', {
+        flow: currentFlow(),
+        intent: context.intent || '',
+        profile: context.profile || '',
+        profile_name: context.profileName || '',
+        recommendation_index: idx + 1,
+        recommendation_title: rec.title,
+        recommendation_author: rec.author
+      });
+      track('outbound_audible_click', outboundClickPayload(context.profile || '', pickLink.href));
+    });
     // lazy-attach real cover art (live picks only); the gradient + letter stays as placeholder/fallback
     if (rec.cover){
       const cover = el.querySelector('.cover');
@@ -980,24 +1182,34 @@ function renderRecs(recs){
 function showResult(profileKey, details){
   const P = PROFILES[profileKey];
   if (!P) return false;
+  details = details || {};
+  const intent = details.intent && INTENTS[details.intent] ? INTENTS[details.intent] : null;
   const token = ++renderToken;
   const resultProps = Object.assign({
     profile: profileKey,
     profile_name: P.name,
+    intent: details.intent || '',
     aaf_profile: profileKey,
-    cta_href: buildAffiliateUrl(profileKey)
-  }, details || {});
+    cta_href: buildAffiliateUrl(profileKey, { aaf_intent: details.intent || '' })
+  }, details);
   track('result_view', resultProps);
 
-  $('#r-name').textContent = P.name;
-  $('#r-why').textContent = P.why;
+  $('#r-eyebrow').textContent = intent ? intent.eyebrow : 'Your listener profile';
+  $('#r-name').textContent = intent ? intent.headline : P.name;
+  $('#r-why').textContent = intent ? intent.why : P.why;
+  $('#r-recs-label').childNodes[0].nodeValue = (intent ? intent.recsLabel : 'Three picks for you') + ' ';
+  $('#cta-note').textContent = intent ? intent.ctaNote : 'Ready to press play? Start a listen on Audible.';
   $('#r-fresh').classList.remove('show');
 
   // 1) Render curated picks immediately — instant, always works.
-  renderRecs(P.recs);
+  renderRecs((intent && intent.recs) ? intent.recs : P.recs, {
+    intent: details.intent || '',
+    profile: profileKey,
+    profileName: P.name
+  });
 
   const cta = $('#cta-btn');
-  cta.href = buildAffiliateUrl(profileKey);
+  cta.href = buildAffiliateUrl(profileKey, { aaf_intent: details.intent || '' });
   cta.onclick = function(){ track('outbound_audible_click', outboundClickPayload(profileKey, cta.href)); };
 
   show('result');
@@ -1013,7 +1225,11 @@ function showResult(profileKey, details){
       recBox.classList.add('swapping');
       setTimeout(function(){
         if (token !== renderToken) return;
-        renderRecs(live);
+        renderRecs(live, {
+          intent: details.intent || '',
+          profile: profileKey,
+          profileName: P.name
+        });
         recBox.classList.remove('swapping');
         $('#r-fresh').classList.add('show');
         track('recs_refreshed', { profile: profileKey, source: 'openlibrary', count: live.length });
@@ -1027,36 +1243,71 @@ function finishQuiz(){
   const r = computeProfile();
   const P = PROFILES[r.key];
   track('quiz_complete', { profile: r.key, profile_name: P.name, scores: r.score });
+  activeIntentKey = '';
   showResult(r.key, { source: 'quiz', scores: r.score });
 }
 
 /* ── FLOW WIRING ─────────────────────────────────────────────────────── */
 $('#start-btn').addEventListener('click', function(){
   if (!started){ track('quiz_start', { flow: 'quiz', source: 'start_button' }); started = true; }
+  activeIntentKey = '';
   step = 0; answers = [];
+  renderQuestion();
+  show('quiz');
+});
+$('#result-quiz-btn').addEventListener('click', function(){
+  const sourceIntent = activeIntentKey;
+  track('quiz_start', {
+    flow: sourceIntent ? 'direct_intent' : currentFlow(),
+    source: 'result_secondary_cta',
+    intent: sourceIntent || ''
+  });
+  activeIntentKey = '';
+  started = true; step = 0; answers = [];
   renderQuestion();
   show('quiz');
 });
 $('#back-btn').addEventListener('click', goBack);
 $('#retake-btn').addEventListener('click', function(){
   renderToken++;            // invalidate any in-flight live fetch
+  activeIntentKey = '';
   started = false; step = 0; answers = [];
   show('hero');
 });
 
 /* page_view */
 initTrackingIntegrations();
-const requestedProfile = new URLSearchParams(location.search).get('profile');
+renderIntentLinks();
+const inboundSearch = new URLSearchParams(location.search);
+const requestedIntent = inboundSearch.get('intent');
+const directIntent = normalizeIntent(requestedIntent);
+const requestedProfile = inboundSearch.get('profile');
 const directProfile = requestedProfile ? PROFILE_ALIASES[requestedProfile.toLowerCase()] : null;
 track('page_view', {
   path: location.pathname,
   utms: getInboundParams(),
-  flow: directProfile ? 'direct_profile' : 'quiz',
+  flow: directIntent ? 'direct_intent' : (directProfile ? 'direct_profile' : 'quiz'),
+  intent: directIntent || '',
+  intent_requested: requestedIntent || '',
   profile: directProfile || '',
   profile_requested: requestedProfile || '',
-  source: directProfile ? 'profile_url' : 'quiz_landing'
+  source: directIntent ? 'intent_url' : (directProfile ? 'profile_url' : 'quiz_landing')
 });
-if (directProfile){
+if (directIntent){
+  const intent = INTENTS[directIntent];
+  activeIntentKey = directIntent;
+  started = true;
+  track('intent_page_view', {
+    flow: 'direct_intent',
+    intent: directIntent,
+    intent_requested: requestedIntent || '',
+    profile: intent.profile,
+    profile_name: PROFILES[intent.profile].name,
+    source: 'intent_url'
+  });
+  showResult(intent.profile, { source: 'intent_url', intent: directIntent, requested_intent: requestedIntent });
+} else if (directProfile){
+  activeIntentKey = '';
   started = true;
   showResult(directProfile, { source: 'profile_url', requested_profile: requestedProfile });
 }
