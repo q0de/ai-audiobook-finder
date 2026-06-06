@@ -82,17 +82,54 @@
     mix-blend-mode:screen;
   }
   body::after{
-    width:520px;
-    height:270px;
-    right:-210px;
-    top:34%;
+    width:560px;
+    height:330px;
+    right:-230px;
+    top:29%;
     border-radius:50%;
-    opacity:.62;
-    background:
-      repeating-linear-gradient(90deg, transparent 0 14px, rgba(255,121,13,.44) 14px 16px),
-      radial-gradient(circle at 52% 56%, rgba(255,153,28,.52), transparent 54%);
-    -webkit-mask:linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
-    mask:linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+    opacity:.34;
+    background-image:url("assets/site/premium-wave-bg.png");
+    background-size:700px auto;
+    background-position:center;
+    background-repeat:no-repeat;
+    filter:saturate(1.15) contrast(1.08);
+    mix-blend-mode:screen;
+    -webkit-mask:radial-gradient(ellipse at 64% 48%, #000 0 34%, rgba(0,0,0,.58) 50%, transparent 72%);
+    mask:radial-gradient(ellipse at 64% 48%, #000 0 34%, rgba(0,0,0,.58) 50%, transparent 72%);
+  }
+  .ambient{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .float-glyph{
+    position:absolute;
+    display:grid;
+    place-items:center;
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    color:rgba(255,153,28,.78);
+    background:rgba(8,14,31,.38);
+    border:1px solid rgba(255,153,28,.24);
+    box-shadow:0 0 28px rgba(255,122,5,.10), inset 0 1px 0 rgba(255,255,255,.05);
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);
+    opacity:.38;
+  }
+  .float-glyph svg{ width:24px; height:24px; stroke:currentColor; }
+  .float-glyph.one{ top:16%; right:calc(50% - 360px); }
+  .float-glyph.two{ top:51%; left:calc(50% - 360px); width:42px; height:42px; opacity:.26; }
+  .float-glyph.three{ bottom:13%; right:calc(50% - 320px); width:44px; height:44px; opacity:.30; }
+  @media (prefers-reduced-motion: no-preference){
+    .float-glyph.one{ animation: driftOne 8s ease-in-out infinite; }
+    .float-glyph.two{ animation: driftTwo 9s ease-in-out infinite; }
+    .float-glyph.three{ animation: driftThree 10s ease-in-out infinite; }
+    @keyframes driftOne{ 0%,100%{ transform:translate3d(0,0,0); } 50%{ transform:translate3d(-8px,12px,0); } }
+    @keyframes driftTwo{ 0%,100%{ transform:translate3d(0,0,0); } 50%{ transform:translate3d(10px,-10px,0); } }
+    @keyframes driftThree{ 0%,100%{ transform:translate3d(0,0,0); } 50%{ transform:translate3d(-12px,-8px,0); } }
   }
   .wrap{
     position:relative;
@@ -462,11 +499,25 @@
     .profile{ font-size:clamp(29px, 8.4vw, 36px); }
     .sub{ font-size:16.5px; }
     .btn{ font-size:16.5px; padding:17px 20px; }
-    body::after{ right:-280px; opacity:.48; }
+    body::after{ right:-270px; top:35%; opacity:.28; background-size:620px auto; }
+    .float-glyph.one{ top:12%; right:18px; }
+    .float-glyph.two{ top:48%; left:-14px; }
+    .float-glyph.three{ bottom:16%; right:10px; }
   }
 </style>
 </head>
 <body data-theme="midnight" data-card="glass">
+  <div class="ambient" aria-hidden="true">
+    <span class="float-glyph one">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3a6.8 6.8 0 0 0 8.8 8.8 8.2 8.2 0 1 1-8.8-8.8Z" stroke-width="2" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="float-glyph two">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 16V9M10 18V5M15 16v-6M20 18V7" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </span>
+    <span class="float-glyph three">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M9.5 14.5 14.5 9.5M8.5 11.5l-1.3 1.3a3 3 0 0 0 4.2 4.2l1.3-1.3M15.5 12.5l1.3-1.3a3 3 0 0 0-4.2-4.2l-1.3 1.3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+  </div>
 
   <div class="wrap">
     <!-- Brand -->
