@@ -82,20 +82,18 @@
     mix-blend-mode:screen;
   }
   body::after{
-    width:620px;
-    height:300px;
-    right:-82px;
-    top:13%;
+    width:min(560px, 48vw);
+    height:260px;
+    right:22px;
+    top:92px;
     border-radius:50%;
-    opacity:.38;
+    opacity:.34;
     background-image:url("assets/site/premium-wave-bg.png");
-    background-size:700px auto;
+    background-size:contain;
     background-position:center;
     background-repeat:no-repeat;
     filter:saturate(1.15) contrast(1.08);
     mix-blend-mode:screen;
-    -webkit-mask:radial-gradient(ellipse at 64% 48%, #000 0 34%, rgba(0,0,0,.58) 50%, transparent 72%);
-    mask:radial-gradient(ellipse at 64% 48%, #000 0 34%, rgba(0,0,0,.58) 50%, transparent 72%);
   }
   .ambient{
     position:fixed;
@@ -131,7 +129,7 @@
     transform:translateX(-50%) translateY(8px);
     opacity:0;
     display:grid;
-    grid-template-columns:auto 1fr auto;
+    grid-template-columns:auto 1fr;
     align-items:center;
     gap:14px;
     padding:16px 18px;
@@ -164,15 +162,18 @@
   .quiz-ambient-card b{ display:block; font-size:15px; line-height:1.1; }
   .quiz-ambient-card span{ display:block; color:var(--faint); font-size:12.5px; margin-top:2px; }
   .quiz-ambient-card .mini-wave{
-    width:64px;
-    height:36px;
-    opacity:.86;
+    position:absolute;
+    top:8px;
+    right:10px;
+    width:150px;
+    height:72px;
+    opacity:.46;
     background-image:url("assets/site/premium-wave-bg.png");
-    background-size:150px auto;
+    background-size:contain;
     background-position:center;
     background-repeat:no-repeat;
-    -webkit-mask:linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
-    mask:linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+    filter:saturate(1.18) contrast(1.08);
+    mix-blend-mode:screen;
   }
   @media (prefers-reduced-motion: no-preference){
     .float-glyph.one{ animation: driftOne 8s ease-in-out infinite; }
@@ -550,7 +551,7 @@
     .profile{ font-size:clamp(29px, 8.4vw, 36px); }
     .sub{ font-size:16.5px; }
     .btn{ font-size:16.5px; padding:17px 20px; }
-    body::after{ width:520px; height:250px; right:-145px; top:15%; opacity:.34; background-size:620px auto; }
+    body::after{ width:300px; height:150px; right:8px; top:96px; opacity:.3; background-size:contain; }
     .float-glyph.one{ top:13%; right:24px; }
     .float-glyph.two{ top:36%; left:-10px; }
     .float-glyph.three{ top:54%; right:14px; }
