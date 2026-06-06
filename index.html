@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AI Audiobook Finder — Don't waste your free Audible pick</title>
-<meta name="description" content="Get audiobook picks for your commute, bedtime, business goals, money, fiction mood, or first Audible listen." />
+<meta name="description" content="Get fast audiobook picks and check the limited-time Prime member Audible Standard offer before choosing your first listen." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://openlibrary.org" />
@@ -240,8 +240,51 @@
   h1 em{ font-style:italic; color:var(--accent); font-weight:500; }
   .sub{
     font-size:17.5px; color:var(--muted); max-width:42ch; text-wrap:pretty;
-    margin-bottom:30px;
+    margin-bottom:18px;
   }
+  .offer-strip{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:13px 14px;
+    margin:0 0 22px;
+    border-radius:14px;
+    color:var(--muted);
+    background:
+      linear-gradient(135deg, rgba(255,153,28,.13), rgba(255,255,255,.035)),
+      rgba(8,14,31,.50);
+    border:1px solid rgba(255,153,28,.30);
+    box-shadow:0 22px 54px -40px rgba(255,122,5,.55), inset 0 1px 0 rgba(255,255,255,.06);
+    -webkit-backdrop-filter:blur(var(--blur));
+    backdrop-filter:blur(var(--blur));
+  }
+  .offer-strip .gift{
+    display:grid;
+    place-items:center;
+    flex:0 0 auto;
+    width:34px;
+    height:34px;
+    border-radius:11px;
+    color:var(--accent);
+    border:1px solid rgba(255,153,28,.42);
+    background:rgba(255,153,28,.08);
+  }
+  .offer-strip svg{ width:19px; height:19px; stroke:currentColor; }
+  .offer-strip b{ color:var(--text); font-weight:700; }
+  .offer-strip span:last-child{ display:block; font-size:12.5px; color:var(--faint); margin-top:3px; line-height:1.35; }
+  .offer-note{
+    margin:0 0 14px;
+    padding:12px 13px;
+    border-radius:13px;
+    text-align:left;
+    color:var(--muted);
+    font-size:13.5px;
+    line-height:1.4;
+    background:rgba(255,153,28,.07);
+    border:1px solid rgba(255,153,28,.24);
+  }
+  .offer-note b{ color:var(--text); font-weight:700; }
+  .offer-note small{ display:block; margin-top:3px; color:var(--faint); font-size:12px; }
   .meta{
     display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px;
     color:var(--faint); font-size:13.5px; font-weight:500;
@@ -550,6 +593,8 @@
     h1{ font-size:clamp(36px, 10vw, 46px); line-height:1.06; overflow-wrap:break-word; }
     .profile{ font-size:clamp(29px, 8.4vw, 36px); }
     .sub{ font-size:16.5px; }
+    .offer-strip{ padding:12px; gap:10px; }
+    .offer-strip span:last-child{ font-size:12px; }
     .btn{ font-size:16.5px; padding:17px 20px; }
     body::after{ width:300px; height:150px; right:8px; top:96px; opacity:.3; background-size:contain; }
     .float-glyph.one{ top:13%; right:24px; }
@@ -591,6 +636,10 @@
         <span class="eyebrow">Personalized in under a minute</span>
         <h1>Don’t waste your free <em>Audible pick.</em></h1>
         <p class="sub">Choose the situation you’re listening for and get three audiobook picks you can start with right away.</p>
+        <div class="offer-strip">
+          <span class="gift" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 12v8H4v-8M22 7H2v5h20V7ZM12 22V7M12 7H7.5a2.5 2.5 0 1 1 2.3-3.5L12 7Zm0 0h4.5a2.5 2.5 0 1 0-2.3-3.5L12 7Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span><b>Prime members: 3 months free Audible Standard</b><span>Limited-time offer for eligible users. Renews at $8.99/mo after 3 months. Ends July 15, 2026.</span></span>
+        </div>
         <button class="btn btn-primary" id="start-btn">Take the quiz for personalized picks <span class="arr">→</span></button>
         <div class="choice-divider">or</div>
         <div class="intent-grid" id="intent-grid"></div>
@@ -635,6 +684,7 @@
 
       <div class="cta-card">
         <p class="cta-note" id="cta-note">Ready to press play? Start a listen on Audible.</p>
+        <div class="offer-note"><b>Prime member offer:</b> eligible users may get Audible Standard free for 3 months.<small>Auto-renews at $8.99/mo after 3 months. Cancel anytime. Ends July 15, 2026.</small></div>
         <a class="btn btn-primary" id="cta-btn" href="#" target="_blank" rel="noopener nofollow sponsored">
           Start listening <span class="arr">→</span>
         </a>
