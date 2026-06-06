@@ -543,7 +543,7 @@ const PLAUSIBLE_EVENTS = {
    show up as optimizable conversions), trackCustom for the rest. PageView is
    already fired on init. Outbound Audible click is the key conversion.       */
 const META_EVENTS = {
-  intent_page_view:       { method:'track',       name:'ViewContent' },
+  intent_page_view:       { method:'trackCustom', name:'IntentPageViewed' },
   quiz_start:             { method:'trackCustom', name:'QuizStarted' },
   quiz_complete:          { method:'track',       name:'Lead' },
   result_view:            { method:'track',       name:'ViewContent' },
