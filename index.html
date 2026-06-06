@@ -94,6 +94,14 @@
     background-repeat:no-repeat;
     filter:saturate(1.15) contrast(1.08);
     mix-blend-mode:screen;
+    -webkit-mask:
+      linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%),
+      linear-gradient(180deg, transparent 0, #000 16%, #000 72%, transparent 100%);
+    -webkit-mask-composite:source-in;
+    mask:
+      linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%),
+      linear-gradient(180deg, transparent 0, #000 16%, #000 72%, transparent 100%);
+    mask-composite:intersect;
   }
   .ambient{
     position:fixed;
@@ -174,6 +182,14 @@
     background-repeat:no-repeat;
     filter:saturate(1.18) contrast(1.08);
     mix-blend-mode:screen;
+    -webkit-mask:
+      linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%),
+      linear-gradient(180deg, transparent 0, #000 18%, #000 78%, transparent 100%);
+    -webkit-mask-composite:source-in;
+    mask:
+      linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%),
+      linear-gradient(180deg, transparent 0, #000 18%, #000 78%, transparent 100%);
+    mask-composite:intersect;
   }
   @media (prefers-reduced-motion: no-preference){
     .float-glyph.one{ animation: driftOne 8s ease-in-out infinite; }
