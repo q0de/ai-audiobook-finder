@@ -82,26 +82,17 @@
     mix-blend-mode:screen;
   }
   body::after{
-    width:min(560px, 48vw);
-    height:260px;
-    right:22px;
-    top:92px;
-    border-radius:50%;
-    opacity:.34;
-    background-image:url("assets/site/premium-wave-bg.png");
+    width:min(680px, 58vw);
+    height:340px;
+    right:-46px;
+    top:68px;
+    opacity:.30;
+    background-image:url("assets/site/premium-wave-bg-soft.png");
     background-size:contain;
     background-position:center;
     background-repeat:no-repeat;
-    filter:saturate(1.15) contrast(1.08);
+    filter:blur(.8px) saturate(1.16) contrast(1.06);
     mix-blend-mode:screen;
-    -webkit-mask:
-      linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%),
-      linear-gradient(180deg, transparent 0, #000 16%, #000 72%, transparent 100%);
-    -webkit-mask-composite:source-in;
-    mask:
-      linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%),
-      linear-gradient(180deg, transparent 0, #000 16%, #000 72%, transparent 100%);
-    mask-composite:intersect;
   }
   .ambient{
     position:fixed;
